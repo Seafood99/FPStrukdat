@@ -1,0 +1,342 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+struct PhoneBook
+{
+    string name;
+    string address;
+    string number;
+    PhoneBook* next;
+};
+
+PhoneBook* head = nullptr;
+int counter = 0;
+// Pada baris ini, beberapa header file standar disertakan.
+// Struct PhoneBook didefinisikan untuk merepresentasikan entri dalam buku telepon.
+// Variabel head bertipe PhoneBook* digunakan untuk melacak elemen pertama dari linked list.
+// Variabel counter digunakan untuk melacak jumlah total kontak dalam buku telepon.
+
+void add_contact();
+void show_contact();
+void search_contact();
+void edit_contact();
+void delete_contact();
+char get_menu();
+void quickSort(PhoneBook* low, PhoneBook* high);
+PhoneBook* partition(PhoneBook* low, PhoneBook* high);
+
+int main()
+{
+    while (true)
+    {
+        char select = get_menu();
+        if (select == '1')
+            add_contact();
+        else if (select == '2')
+            show_contact();
+        else if (select == '3')
+            search_contact();
+        else if (select == '4')
+            edit_contact();
+        else if (select == '5')
+            delete_contact();
+        else if (select == '6')
+            break;
+    }
+    return 0;
+}
+
+// Deklarasi fungsi-fungsi yang digunakan dalam program.
+// Fungsi main yang merupakan titik masuk program.
+// Pada blok while (true), program akan terus berjalan hingga opsi '6' (Exit) dipilih.
+// Fungsi get_menu() digunakan untuk mendapatkan pilihan menu dari pengguna dan menjalankan fungsi yang sesuai berdasarkan pilihan.
+
+void add_contact()
+{
+    system("cls");
+    cout << "Add New Contact\n";
+    PhoneBook* newContact = new PhoneBook;
+    cout << "- Name : ";
+    getline(cin, newContact->name);
+    cout << "- Address: ";
+    getline(cin, newContact->address);
+    cout << "- Phone : ";
+    getline(cin, newContact->number);
+    newContact->next = nullptr;
+    
+    if (head == nullptr)
+    {
+        head = newContact;
+    }
+    else
+    {
+        PhoneBook* current = head;
+        while (current->next != nullptr)
+        {
+            current = current->next;
+        }
+        current->next = newContact;
+    }
+    
+    ++counter;
+}
+
+// Fungsi add_contact() digunakan untuk menambahkan kontak baru ke dalam buku telepon.
+// Elemen baru newContact dari tipe PhoneBook dibuat dan data kontak dimasukkan oleh pengguna.
+// Jika head masih kosong, maka newContact menjadi elemen pertama.
+// Jika tidak, maka newContact ditambahkan sebagai elemen terakhir dengan menggunakan traversal linked list.
+
+void show_contact()
+{
+    system("cls");
+    cout << "Show Contact\n";
+    cout << "--------------------------------------------------------------\n";
+    cout << setw(4) << "#";
+    cout << setw(15) << "Name";
+    cout << setw(30) << "Address";
+    cout << setw(13) << "Number";
+    cout << endl;
+    cout << "--------------------------------------------------------------\n";
+
+    quickSort(head, nullptr); // Memanggil quickSort sebelum menampilkan kontak
+
+    PhoneBook* current = head;
+
+    int index = 1;
+    while (current != nullptr)
+    {
+        cout << setw(4) << index;
+        cout << setw(15) << current->name;
+        cout << setw(30) << current->address;
+        cout << setw(13) << current->number;
+        cout << endl;
+
+        current = current->next;
+        index++;
+    }
+
+    cout << "--------------------------------------------------------------\n";
+    system("pause");
+}
+
+// Fungsi show_contact() digunakan untuk menampilkan semua kontak yang ada dalam buku telepon.
+// Elemen-elemen kontak ditampilkan dalam bentuk tabel dengan menggunakan fungsi setw() untuk mengatur lebar kolom.
+// Sebelum menampilkan kontak, fungsi quickSort() dipanggil untuk mengurutkan kontak berdasarkan nama menggunakan algoritma QuickSort.
+// Setiap elemen kontak dicetak menggunakan traversal linked list.
+
+void search_contact()
+{
+    system("cls");
+    cout << "Search Contact\n";
+    cout << "Enter keyword to search: ";
+    string keyword;
+    getline(cin, keyword);
+    bool found = false;
+    
+    PhoneBook* current = head;
+    
+    while (current != nullptr)
+    {
+        if (current->name.find(keyword) != string::npos || current->address.find(keyword) != string::npos || current->number.find(keyword) != string::npos)
+        {
+            if (!found)
+            {
+                cout << "--------------------------------------------------------------\n";
+                cout << setw(4) << "#";
+                cout << setw(15) << "Name";
+                cout << setw(30) << "Address";
+                cout << setw(13) << "Number";
+                cout << endl;
+                cout << "--------------------------------------------------------------\n";
+            }
+            found = true;
+            cout << setw(4) << found;
+            cout << setw(15) << current->name;
+            cout << setw(30) << current->address;
+            cout << setw(13) << current->number;
+            cout << endl;
+        }
+        current = current->next;
+    }
+    
+    if (!found)
+    {
+        cout << "No contacts found.\n";
+    }
+    cout << "--------------------------------------------------------------\n";
+    system("pause");
+}
+
+// Fungsi search_contact() digunakan untuk mencari kontak berdasarkan kata kunci yang dimasukkan oleh pengguna.
+// Setiap elemen kontak dicek apakah mengandung kata kunci dalam nama, alamat, atau nomor telepon.
+// Jika ada kontak yang cocok, tabel kolom ditampilkan dengan menggunakan setw().
+// Jika tidak ada kontak yang cocok, pesan "No contacts found." ditampilkan.
+
+void edit_contact()
+{
+    system("cls");
+    cout << "Edit Contact\n";
+    cout << "Enter contact number to edit (1-" << counter << "): ";
+    int choice;
+    cin >> choice;
+    cin.ignore(); // membaca newline karakter setelah memasukkan choice
+
+    if (choice < 1 || choice > counter)
+    {
+        cout << "Invalid choice.\n";
+    }
+    else
+    {
+        PhoneBook* current = head;
+        for (int i = 1; i < choice; ++i)
+        {
+            current = current->next;
+        }
+        
+        cout << "Name: " << current->name << endl;
+        cout << "Address: " << current->address << endl;
+        cout << "Phone: " << current->number << endl;
+        cout << "Enter new data:\n";
+        cout << "Name: ";
+        getline(cin, current->name);
+        cout << "Address: ";
+        getline(cin, current->address);
+        cout << "Phone: ";
+        getline(cin, current->number);
+        cout << "Contact updated.\n";
+    }
+    system("pause");
+}
+
+// Fungsi edit_contact() digunakan untuk mengedit kontak yang ada berdasarkan nomor kontak yang dimasukkan oleh pengguna.
+// Pengguna diminta memasukkan nomor kontak yang ingin diubah.
+// Jika nomor yang dimasukkan tidak valid, pesan "Invalid choice." ditampilkan.
+// Jika nomor yang dimasukkan valid, kontak dengan nomor tersebut ditemukan dan informasi kontak ditampilkan.
+// Pengguna diminta memasukkan data baru untuk kontak tersebut, yaitu nama, alamat, dan nomor telepon.
+// Setelah data kontak diubah, pesan "Contact updated." ditampilkan.
+
+void delete_contact()
+{
+    system("cls");
+    cout << "Delete Contact\n";
+    cout << "--------------------------------------------------------------\n";
+    cout << setw(4) << "#";
+    cout << setw(15) << "Name";
+    cout << setw(30) << "Address";
+    cout << setw(13) << "Number";
+    cout << endl;
+    cout << "--------------------------------------------------------------\n";
+    
+    PhoneBook* current = head;
+    int index = 1;
+    while (current != nullptr)
+    {
+        cout << setw(4) << index;
+        cout << setw(15) << current->name;
+        cout << setw(30) << current->address;
+        cout << setw(13) << current->number;
+        cout << endl;
+        
+        current = current->next;
+        index++;
+    }
+    
+    cout << "--------------------------------------------------------------\n";
+    cout << "Enter the index of the contact you want to delete (1-" << counter << "): ";
+    int choice;
+    cin >> choice;
+
+    if (choice < 1 || choice > counter)
+    {
+        cout << "Invalid index. Deletion cancelled." << endl;
+        return;
+    }
+    
+    PhoneBook* previous = nullptr;
+    current = head;
+    for (int i = 1; i < choice; ++i)
+    {
+        previous = current;
+        current = current->next;
+    }
+    
+    if (previous != nullptr)
+    {
+        previous->next = current->next;
+    }
+    else
+    {
+        head = current->next;
+    }
+    
+    delete current;
+    --counter;
+    cout << "Contact deleted." << endl;
+    system("pause");
+}
+
+// Fungsi delete_contact() digunakan untuk menghapus kontak yang ada berdasarkan indeks kontak yang dimasukkan oleh pengguna.
+// Seluruh kontak ditampilkan dalam bentuk tabel sebelum pengguna diminta memasukkan indeks kontak yang ingin dihapus.
+// Jika indeks yang dimasukkan tidak valid, pesan "Invalid index. Deletion cancelled." ditampilkan.
+// Jika indeks yang dimasukkan valid, kontak dengan indeks tersebut ditemukan dan dihapus dari linked list.
+// Elemen kontak yang dihapus akan dihapus dari memori menggunakan operator delete.
+// Counter dikurangi satu untuk mengurangi jumlah total kontak.
+// Pesan "Contact deleted." ditampilkan setelah penghapusan kontak selesai.
+
+char get_menu()
+{
+    system("cls");
+    cout << "Phone Book\n";
+    cout << " [1] Add Contact\n";
+    cout << " [2] Show Contact\n";
+    cout << " [3] Search Contact\n";
+    cout << " [4] Edit Contact\n";
+    cout << " [5] Delete Contact\n";
+    cout << " [6] Exit\n";
+    cout << "Select: ";
+    string sel;
+    getline(cin, sel);
+    return sel[0]; // hanya mengambil karakter ke-0
+}
+
+void quickSort(PhoneBook* low, PhoneBook* high)
+{
+    if (low != nullptr && high != nullptr && low != high && low != high->next)
+    {
+        PhoneBook* pi = partition(low, high);
+
+        quickSort(low, pi);
+        quickSort(pi->next, high);
+    }
+}
+
+PhoneBook* partition(PhoneBook* low, PhoneBook* high)
+{
+    string pivot = high->name;
+    PhoneBook* i = low;
+    
+    for (PhoneBook* j = low; j != high; j = j->next)
+    {
+        if (j->name < pivot)
+        {
+            swap(i->name, j->name);
+            swap(i->address, j->address);
+            swap(i->number, j->number);
+            i = i->next;
+        }
+    }
+    
+    swap(i->name, high->name);
+    swap(i->address, high->address);
+    swap(i->number, high->number);
+    
+    return i;
+}
+
+// Fungsi get_menu() digunakan untuk mencetak menu program dan mengembalikan pilihan menu yang dimasukkan oleh pengguna.
+// Fungsi quickSort() dan partition() digunakan untuk mengurutkan kontak berdasarkan nama menggunakan algoritma QuickSort.
+// Fungsi partition() membagi daftar kontak menjadi dua bagian berdasarkan elemen pivot (di sini pivot adalah elemen terakhir) dan mengembalikan posisi pivot yang baru.
+// Fungsi quickSort() memanggil dirinya sendiri secara rekursif untuk mengurutkan kedua bagian kontak secara terpisah.
